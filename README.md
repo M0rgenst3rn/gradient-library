@@ -25,12 +25,14 @@ sets inside, so there is nothing to credit and nothing to worry about when you u
 
 ### Highlights
 
-- **1,444 gradients** in 6 groups and 38 categories, each with a preview
+- **1,444 gradients** in 6 groups and 38 categories
+- **Families at a glance**: every gradient sits in one tile with its variants (deeper, lighter, two-colour) as
+  slim swatches below – over 600 families in a dense swatch view, or a list with names
 - **Fill layer or Gradient Map**: a gradient fill layer, or an adjustment layer that colours your photo
 - **Swap selected**: with a gradient layer selected, a click swaps its gradient. Angle, style, mask and position stay
 - **Style, angle and reverse** for new fill layers. Gradient Maps run dark → light automatically
 - **Perceptual blending**: colours blend like the eye sees them, without muddy middles
-- **Search, favourites and recently used**
+- **Search, favourites and recently used**. Point at a gradient to see its name
 - **Gradients panel**: add the shown list or your favourites to *Window › Gradients* as a group, or export a `.grd` file
 - **Transparent gradients**: fades, overlays and light leaks keep their transparency
 - **Self-test**: checks every function against the real Photoshop result
@@ -55,16 +57,16 @@ they run from shadows to highlights and give a photo a complete colour grade in 
 
 1. Open a document and the panel (**Plugins › MS Gradients**)
 2. Choose **Fill layer** or **Gradient Map**. For fill layers, also choose style and angle
-3. Pick a group and a category, or search (e.g. "gold", "teal film", "sunset")
-4. **Click a gradient**: it lands as a new layer above the selected one. With an active selection, the layer gets a matching mask
+3. Pick a group or category from the menu above the swatches, or search (e.g. "gold", "teal film", "sunset")
+4. **Click a gradient** – the large swatch, or one of its variants below it: it lands as a new layer above the selected one. With an active selection, the layer gets a matching mask
 5. Want a different one? Keep the layer selected and click another gradient: with **Swap selected** on, the layer just changes its gradient
 6. **Edit it in Photoshop**: double-click the layer thumbnail. For a fill layer, click the gradient in the dialog to open the gradient editor
 
 **Saving to the Gradients panel:**
 
 - **One gradient:** in Photoshop's gradient editor, type a name and click **New**
-- **A whole list:** open *Gradients panel & tools* in the panel and click **Add list to Gradients panel** (adds the list you see, e.g. a category or a search) or **Add favourites**. They appear in *Window › Gradients* as a group "MS Gradients · …"
-- **As a file:** **Export .grd…** saves the list. Import it later via *Window › Gradients › menu › Import Gradients…*
+- **A whole list:** open the **⋯** menu at the top of the panel and click **Add this list to the Gradients panel** (adds the list you see, e.g. a category or a search) or **Add favourites to the Gradients panel**. They appear in *Window › Gradients* as a group "MS Gradients · …"
+- **As a file:** **⋯ › Export this list as .grd…** saves the list. Import it later via *Window › Gradients › menu › Import Gradients…*
 
 ## Installation
 
