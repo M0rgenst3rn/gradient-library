@@ -17,12 +17,12 @@ const $ = (id) => document.getElementById(id);
 const HIST = "MS Gradients";
 const STORE = "msgradients.v1";
 const TARGET = [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }];
-const TILE_H = 30, PAGE = 60;
+const CHUNK = 60;   // tiles per render step while scrolling
 
 // ---------------------------------------------------------------- state (remembered by the panel)
-const DEFAULTS = { as: "fill", style: "linear", angle: 90, reverse: false, replace: true, cat: "all", favs: [], recent: [] };
+const DEFAULTS = { as: "fill", style: "linear", angle: 90, reverse: false, replace: true, cat: "all", view: "grid", favs: [], recent: [] };
 let S = load();
-let query = "", shown = PAGE, busy = false, lastKey = null;
+let query = "", busy = false, lastKey = null;
 function load() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(STORE) || "{}")); } catch (e) { return Object.assign({}, DEFAULTS); } }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* ignore */ } }
 const opts = () => ({ as: S.as, style: S.style, angle: S.angle, reverse: S.reverse });
@@ -58,73 +58,149 @@ function catTitle(cat) {
 }
 const GROUPS = [];
 for (const c of Core.CATS) { let gr = GROUPS.find((x) => x.name === c.group); if (!gr) GROUPS.push(gr = { name: c.group, cats: [], n: 0 }); gr.cats.push(c); gr.n += c.count; }
-// the group the current choice belongs to (a group itself or one of its categories)
-function activeGroup() { return S.cat.indexOf("g:") === 0 ? S.cat.slice(2) : Core.CAT[S.cat] ? Core.CAT[S.cat].group : null; }
+const validCat = (cat) => cat === "all" || cat === "fav" || cat === "recent" || (cat.indexOf("g:") === 0 && GROUPS.some((g) => g.name === cat.slice(2))) || !!Core.CAT[cat];
 
-// thumbnail: one row of the category's sprite, shown through a 30 px window
-function thumb(g) {
-  const c = Core.CAT[g.cat];
-  return `<img src="thumbs/${g.cat}.png" style="top:${-g.row * TILE_H}px;height:${c.count * TILE_H}px">`;
+// Families: a gradient and its variants (· Deep, · Light, · Core, · Duo …) share one tile, so the browser
+// shows 618 families instead of 1444 near-repeats – every variant is still one click away.
+const FAMS = [], FAM_OF = {};
+(function () {
+  const by = {};
+  for (const g of Core.ALL) {
+    const base = g.name.split(" · ")[0], k = g.cat + "/" + base;
+    let f = by[k];
+    if (!f) { f = by[k] = { key: k, name: base, cat: g.cat, items: [] }; FAMS.push(f); }
+    f.items.push(g); FAM_OF[g.key] = f;
+  }
+  for (const f of FAMS) { f.main = f.items.find((g) => g.name.indexOf(" · ") < 0) || f.items[0]; f.vars = f.items.filter((g) => g !== f.main); }
+})();
+
+// what the browser shows: families for the library, single gradients for favourites and recent
+function entries() {
+  const list = currentList(), counts = {};
+  for (const g of list) counts[g.cat] = (counts[g.cat] || 0) + 1;
+  if (S.cat === "fav" || S.cat === "recent") return { n: list.length, counts, items: list.map((g) => ({ name: g.name, main: g, vars: [], cat: g.cat, single: true })) };
+  const out = [], seen = {};
+  for (const g of list) {
+    const f = FAM_OF[g.key];
+    if (seen[f.key]) continue;
+    seen[f.key] = true;
+    out.push({ name: f.name, main: f.main, vars: f.vars, cat: f.cat });
+  }
+  return { n: list.length, counts, items: out };
 }
 
-// ---------------------------------------------------------------- rendering
-// two levels: All / Favourites / Recent / the six groups – then the categories of the chosen group
-function renderCats() {
-  if (S.cat !== "all" && S.cat !== "fav" && S.cat !== "recent" && !activeGroup()) S.cat = "all";
-  const grp = activeGroup();
-  const chip = (id, name, n, on) => `<div class="chip${on ? " active" : ""}" data-cat="${UI.esc(id)}">${UI.esc(name)}<span class="n">${n}</span></div>`;
-  let html = `<div class="chips">${chip("all", "All", Core.ALL.length, S.cat === "all")}${chip("fav", "★ Favourites", S.favs.length, S.cat === "fav")}${chip("recent", "Recent", S.recent.length, S.cat === "recent")}` +
-    GROUPS.map((gr) => chip("g:" + gr.name, gr.name, gr.n, grp === gr.name)).join("") + `</div>`;
-  if (grp) {
-    const gr = GROUPS.find((x) => x.name === grp);
-    html += `<div class="sub-chips">${chip("g:" + grp, "All " + grp, gr.n, S.cat === "g:" + grp)}${gr.cats.map((c) => chip(c.id, c.name, c.count, S.cat === c.id)).join("")}</div>`;
+// thumbnail: one row of the category's sprite (rows of TH px), scaled to a window of h px
+function thumb(g, h) { return `<img src="thumbs/${g.cat}.png" style="top:${-g.row * h}px;height:${Core.CAT[g.cat].count * h}px">`; }
+
+// ---------------------------------------------------------------- the browser
+let view = { items: [], done: 0, lastCat: null, headings: false, counts: {} };
+function tileHTML(it) {
+  const fav = S.favs.indexOf(it.main.key) >= 0, on = (g) => (g.key === lastKey ? " on" : "");
+  const star = `<div class="fstar${fav ? " fav" : ""}" data-star="${UI.esc(it.main.key)}" title="Favourite">${fav ? "★" : "☆"}</div>`;
+  const tip = (g) => ` data-k="${UI.esc(g.key)}" title="${UI.esc(g.name)}"`;
+  if (S.view === "list") {
+    const note = it.single ? Core.CAT[it.cat].name : it.vars.length ? (it.vars.length + 1) + " tones" : "";
+    return `<div class="lrow"><div class="lrow-name"><span class="t">${UI.esc(it.name)}</span><span class="n">${UI.esc(note)}</span></div>` +
+      `<div class="lrow-sw"><div class="sw main${on(it.main)}"${tip(it.main)}>${thumb(it.main, 24)}</div>` +
+      it.vars.map((v) => `<div class="sw v${on(v)}"${tip(v)}>${thumb(v, 24)}</div>`).join("") + `</div>${star}</div>`;
   }
-  $("catList").innerHTML = html;
-  $("catList").querySelectorAll(".chip").forEach((el) => el.addEventListener("click", () => { S.cat = el.getAttribute("data-cat"); shown = PAGE; save(); renderCats(); renderGrid(); }));
-  $("catMeta").textContent = GROUPS.length + " groups · " + Core.CATS.length + " categories";
+  return `<div class="fam"><div class="sw main${on(it.main)}"${tip(it.main)}>${thumb(it.main, 36)}</div>` +
+    `<div class="vars">${it.vars.map((v) => `<div class="sw${on(v)}"${tip(v)}>${thumb(v, 7)}</div>`).join("")}</div>${star}</div>`;
+}
+function renderMore() {
+  const end = Math.min(view.items.length, view.done + CHUNK);
+  if (end <= view.done) return;
+  let html = "";
+  for (let i = view.done; i < end; i++) {
+    const it = view.items[i];
+    if (view.headings && it.cat !== view.lastCat) {
+      html += `<div class="cat-h${view.lastCat === null ? " first" : ""}"><span class="t">${UI.esc(Core.CAT[it.cat].name)}</span><span class="n">${view.counts[it.cat] || 0}</span></div>`;
+      view.lastCat = it.cat;
+    }
+    html += tileHTML(it);
+  }
+  view.done = end;
+  const chunk = document.createElement("div");
+  chunk.className = "chunk";
+  chunk.innerHTML = html;
+  $("grid").appendChild(chunk);
+}
+// render more while the list doesn't fill the panel or the end comes into view
+function fillUp() {
+  const sc = $("scroller");
+  let guard = 0;
+  while (view.done < view.items.length && sc.scrollTop + sc.clientHeight > sc.scrollHeight - 400 && guard++ < 20) renderMore();
 }
 function renderGrid() {
-  const list = currentList(), favs = new Set(S.favs);
-  $("gridTitle").textContent = query ? `Search: ${query}` : catTitle(S.cat);
-  $("gridMeta").textContent = list.length + (list.length === 1 ? " gradient" : " gradients") + (query && S.cat !== "all" ? " in " + catTitle(S.cat) : "");
-  const page = list.slice(0, shown);
-  $("grid").innerHTML = page.length ? page.map((g) =>
-    `<div class="gtile${g.key === lastKey ? " active" : ""}" data-k="${UI.esc(g.key)}" title="${UI.esc(g.name + " · " + Core.CAT[g.cat].name)}">` +
-    `<div class="gthumb">${thumb(g)}</div>` +
-    `<div class="gname"><span class="lbl">${UI.esc(g.name)}</span><span class="star${favs.has(g.key) ? " on" : ""}" title="Favourite">${favs.has(g.key) ? "★" : "☆"}</span></div></div>`).join("")
-    : `<div class="empty">${S.cat === "fav" && !query ? "No favourites yet – star a gradient with ☆." : S.cat === "recent" && !query ? "Nothing applied yet." : "No gradient matches."}</div>`;
-  $("grid").querySelectorAll(".gtile").forEach((el) => {
-    const g = Core.BY_KEY[el.getAttribute("data-k")];
-    el.addEventListener("click", () => apply(g));
-    el.querySelector(".star").addEventListener("click", (e) => { e.stopPropagation(); toggleFav(g); });
+  const e = entries();
+  const single = S.cat !== "all" && S.cat.indexOf("g:") !== 0;
+  view = { items: e.items, done: 0, lastCat: null, headings: !single, counts: e.counts };
+  $("grid").innerHTML = "";
+  $("grid").className = "ggrid " + (S.view === "list" ? "list" : "grid");
+  if (!e.items.length) {
+    $("grid").innerHTML = `<div class="chunk"><div class="empty">${S.cat === "fav" && !query ? "No favourites yet – point at a gradient and click ☆." : S.cat === "recent" && !query ? "Nothing applied yet." : "No gradient matches “" + UI.esc(query) + "”."}</div></div>`;
+  }
+  $("scroller").scrollTop = 0;
+  renderMore(); fillUp();
+  renderCats();
+}
+function renderCats() {
+  if (!validCat(S.cat)) S.cat = "all";
+  const n = currentList().length;
+  $("catName").textContent = catTitle(S.cat);
+  $("catCount").textContent = query ? n + " found" : String(n);
+  const item = (id, name, cnt, cls) => `<div class="menu-item${cls ? " " + cls : ""}${S.cat === id ? " on" : ""}" data-cat="${UI.esc(id)}">${UI.esc(name)}<span class="n">${cnt}</span></div>`;
+  $("catMenu").innerHTML = item("all", "All gradients", Core.ALL.length) + item("fav", "★ Favourites", S.favs.length) + item("recent", "Recently used", S.recent.length) +
+    GROUPS.map((gr) => `<div class="menu-sep"></div>` + item("g:" + gr.name, gr.name, gr.n, "grp") + gr.cats.map((c) => item(c.id, c.name, c.count, "sub")).join("")).join("");
+}
+function markActive() {
+  document.querySelectorAll("#grid .sw").forEach((el) => {
+    const on = el.getAttribute("data-k") === lastKey, has = el.className.indexOf(" on") >= 0;
+    if (on && !has) el.className += " on"; else if (!on && has) el.className = el.className.replace(" on", "");
   });
-  $("more").className = list.length > shown ? "btn small ghost more" : "btn small ghost more hidden";
-  $("more").textContent = `Show more (${list.length - shown} left)`;
-  $("countInfo").textContent = Core.ALL.length + " gradients";
 }
-function renderCurrent(g) {
-  const img = $("currentImg");
-  if (!g) { img.className = "hidden"; return; }
+
+// ---------------------------------------------------------------- info line (what you point at, or the last one applied)
+let infoG = null;
+function showInfo(g) {
+  infoG = g || null;
+  const img = $("infoImg");
+  if (!g) { img.className = "hidden"; $("infoStar").className = "ibtn istar hidden"; $("infoName").textContent = "Click a gradient to apply it"; $("infoCat").textContent = "Point at one to see its name"; return; }
   img.src = `thumbs/${g.cat}.png`;
-  img.style.top = (-g.row * TILE_H) + "px"; img.style.height = (Core.CAT[g.cat].count * TILE_H) + "px"; img.style.width = "112px";
+  img.style.top = (-g.row * 28) + "px"; img.style.height = (Core.CAT[g.cat].count * 28) + "px";
   img.className = "";
-  $("currentName").textContent = g.name;
-  $("currentCat").textContent = Core.CAT[g.cat].name;
+  $("infoName").textContent = g.name;
+  $("infoCat").textContent = Core.CAT[g.cat].name + " · " + Core.CAT[g.cat].group;
+  const fav = S.favs.indexOf(g.key) >= 0;
+  $("infoStar").className = "ibtn istar" + (fav ? " fav" : "");
+  $("infoStar").textContent = fav ? "★" : "☆";
 }
-function renderOptions() {
-  UI.syncSeg($("asSeg"), S.as);
-  UI.syncSeg($("styleSeg"), S.style);
-  UI.setSwitch("reverse", S.reverse);
-  UI.setSwitch("replace", S.replace);
-  const fill = S.as === "fill";
-  $("styleRow").className = fill ? "field" : "field hidden";
-  $("angleBox").className = fill ? "" : "hidden";
-}
+const restInfo = () => showInfo(lastKey ? Core.BY_KEY[lastKey] : S.recent[0] ? Core.BY_KEY[S.recent[0]] : null);
+
 function toggleFav(g) {
   const i = S.favs.indexOf(g.key);
   if (i >= 0) S.favs.splice(i, 1); else S.favs.unshift(g.key);
-  save(); renderCats(); renderGrid();
+  save();
+  if (S.cat === "fav") { renderGrid(); return; }
+  const fav = S.favs.indexOf(g.key) >= 0;
+  document.querySelectorAll("#grid .fstar").forEach((el) => { if (el.getAttribute("data-star") === g.key) { el.className = "fstar" + (fav ? " fav" : ""); el.textContent = fav ? "★" : "☆"; } });
+  if (infoG && infoG.key === g.key) showInfo(g);
+  renderCats();
 }
+
+// ---------------------------------------------------------------- options bar
+function renderOptions() {
+  UI.syncSeg($("asSeg"), S.as);
+  UI.syncSeg($("styleSeg"), S.style);
+  const fill = S.as === "fill";
+  $("styleSeg").className = fill ? "seg style-seg" : "seg style-seg hidden";
+  $("angleBox").className = fill ? "angle" : "angle hidden";
+  $("angle").value = String(S.angle);
+  $("reverseTog").className = S.reverse ? "tog on" : "tog";
+  $("replaceTog").className = S.replace ? "tog on" : "tog";
+  document.querySelectorAll(".view-btn").forEach((b) => { b.className = "ibtn view-btn" + (b.getAttribute("data-v") === S.view ? " active" : ""); });
+}
+const clampAngle = (v) => Math.max(-180, Math.min(180, Math.round(v)));
 
 // ---------------------------------------------------------------- applying
 async function apply(g) {
@@ -150,7 +226,8 @@ async function apply(g) {
     lastKey = g.key;
     S.recent = [g.key].concat(S.recent.filter((k) => k !== g.key)).slice(0, 40);
     save();
-    renderCurrent(g); renderCats(); renderGrid();
+    showInfo(g); markActive(); renderCats();
+    if (S.cat === "recent") renderGrid();
     setStatus((swapped ? "Swapped to " : "Applied ") + g.name + (o.as === "map" ? " as Gradient Map" : "") + ". Double-click the layer to edit it.");
     log("apply", { key: g.key, as: o.as, swapped });
   } catch (e) {
@@ -301,26 +378,78 @@ async function selfTest() {
 }
 
 // ---------------------------------------------------------------- wiring
+// the element (or its parent) inside the browser that carries attribute a
+function hit(el, a) { while (el && el.id !== "grid") { if (el.getAttribute && el.getAttribute(a) !== null) return el; el = el.parentNode; } return null; }
+function closeMenus(except) {
+  if (except !== "cat") { $("catMenu").className = "menu hidden"; $("catBtn").className = "menu-btn grow"; }
+  if (except !== "tools") { $("toolsMenu").className = "menu tools hidden"; $("toolsBtn").className = "ibtn more-btn"; }
+}
 function init() {
-  UI.seg($("styleSeg"), Core.STYLES, (v) => { S.style = v; save(); renderOptions(); });
-  $("asSeg").querySelectorAll(".seg-btn").forEach((b) => b.addEventListener("click", () => { S.as = b.getAttribute("data-v"); save(); renderOptions(); }));
-  UI.slider($("angleBox"), { label: "Angle", min: -180, max: 180, step: 1, unit: "°", def: 90 }, { get: () => S.angle, set: (v) => { S.angle = v; }, done: save });
-  UI.bindSwitch("reverse", (on) => { S.reverse = on; save(); });
-  UI.bindSwitch("replace", (on) => { S.replace = on; save(); });
+  if (!validCat(S.cat)) S.cat = "all";
+  // browser
+  const grid = $("grid");
+  grid.addEventListener("click", (e) => {
+    const st = hit(e.target, "data-star");
+    if (st) { e.stopPropagation(); toggleFav(Core.BY_KEY[st.getAttribute("data-star")]); return; }
+    const sw = hit(e.target, "data-k");
+    if (sw) apply(Core.BY_KEY[sw.getAttribute("data-k")]);
+  });
+  grid.addEventListener("mouseover", (e) => { const sw = hit(e.target, "data-k"); if (sw) showInfo(Core.BY_KEY[sw.getAttribute("data-k")]); });
+  grid.addEventListener("mouseleave", restInfo);
+  $("scroller").addEventListener("scroll", fillUp);
+  // search
   let st = null;
   $("search").addEventListener("input", () => {
     clearTimeout(st);
-    st = setTimeout(() => { query = String($("search").value).trim(); shown = PAGE; $("clearSearch").className = query ? "btn small ghost" : "btn small ghost hidden"; renderGrid(); }, 150);
+    st = setTimeout(() => { query = String($("search").value).trim(); $("clearSearch").className = query ? "ibtn" : "ibtn hidden"; renderGrid(); }, 150);
   });
-  $("clearSearch").addEventListener("click", () => { $("search").value = ""; query = ""; shown = PAGE; $("clearSearch").className = "btn small ghost hidden"; renderGrid(); });
-  $("more").addEventListener("click", () => { shown += PAGE; renderGrid(); });
-  $("toPanelCat").addEventListener("click", () => addToPanel(currentList(), query ? "Search " + query : catTitle(S.cat)).catch((e) => setStatus("Could not add: " + (e.message || e), true)));
-  $("toPanelFav").addEventListener("click", () => addToPanel(listFor("fav"), "Favourites").catch((e) => setStatus("Could not add: " + (e.message || e), true)));
-  $("exportGrd").addEventListener("click", () => exportGrd().catch((e) => setStatus("Could not export: " + (e.message || e), true)));
-  $("selfTest").addEventListener("click", selfTest);
-  UI.sections("msgradients.sections", { cats: true, grid: true, panel: false });
-  renderOptions(); renderCats(); renderGrid();
-  const last = S.recent[0] && Core.BY_KEY[S.recent[0]];
-  if (last) renderCurrent(last);
+  $("clearSearch").addEventListener("click", () => { $("search").value = ""; query = ""; $("clearSearch").className = "ibtn hidden"; renderGrid(); });
+  // category menu and tools menu
+  $("catBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = $("catMenu").className.indexOf("hidden") >= 0;
+    closeMenus(open ? "cat" : null);
+    if (open) { $("catMenu").className = "menu"; $("catBtn").className = "menu-btn grow on"; }
+  });
+  $("catMenu").addEventListener("click", (e) => {
+    e.stopPropagation();
+    let el = e.target;
+    while (el && el !== $("catMenu") && !(el.getAttribute && el.getAttribute("data-cat"))) el = el.parentNode;
+    if (!el || el === $("catMenu")) return;
+    S.cat = el.getAttribute("data-cat"); save(); closeMenus(); renderGrid();
+  });
+  $("toolsBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = $("toolsMenu").className.indexOf("hidden") >= 0;
+    closeMenus(open ? "tools" : null);
+    if (open) { $("toolsMenu").className = "menu tools"; $("toolsBtn").className = "ibtn more-btn on"; }
+  });
+  document.addEventListener("click", () => closeMenus());
+  const tool = (id, fn) => $(id).addEventListener("click", (e) => { e.stopPropagation(); closeMenus(); fn(); });
+  tool("toPanelCat", () => addToPanel(currentList(), query ? "Search " + query : catTitle(S.cat)).catch((e) => setStatus("Could not add: " + (e.message || e), true)));
+  tool("toPanelFav", () => addToPanel(listFor("fav"), "Favourites").catch((e) => setStatus("Could not add: " + (e.message || e), true)));
+  tool("exportGrd", () => exportGrd().catch((e) => setStatus("Could not export: " + (e.message || e), true)));
+  tool("selfTest", selfTest);
+  // view
+  document.querySelectorAll(".view-btn").forEach((b) => b.addEventListener("click", () => { S.view = b.getAttribute("data-v"); save(); renderOptions(); renderGrid(); }));
+  // options bar
+  $("asSeg").querySelectorAll(".seg-btn").forEach((b) => b.addEventListener("click", () => { S.as = b.getAttribute("data-v"); save(); renderOptions(); }));
+  UI.seg($("styleSeg"), Core.STYLES, (v) => { S.style = v; save(); renderOptions(); });
+  $("reverseTog").addEventListener("click", () => { S.reverse = !S.reverse; save(); renderOptions(); });
+  $("replaceTog").addEventListener("click", () => { S.replace = !S.replace; save(); renderOptions(); });
+  $("infoStar").addEventListener("click", () => { if (infoG) toggleFav(infoG); });
+  $("angle").addEventListener("change", () => { const v = parseFloat($("angle").value); S.angle = isFinite(v) ? clampAngle(v) : S.angle; save(); renderOptions(); });
+  // drag the word "Angle" left or right to change the angle (Shift: steps of 15°)
+  let scrub = null;
+  $("angleLbl").addEventListener("mousedown", (e) => { scrub = { x: e.clientX, a: S.angle }; e.preventDefault(); });
+  document.addEventListener("mousemove", (e) => {
+    if (!scrub) return;
+    let v = scrub.a + (e.clientX - scrub.x);
+    if (e.shiftKey) v = Math.round(v / 15) * 15;
+    S.angle = clampAngle(v); $("angle").value = String(S.angle);
+  });
+  document.addEventListener("mouseup", () => { if (scrub) { scrub = null; save(); } });
+  renderOptions(); renderGrid();
+  restInfo();
 }
 init();

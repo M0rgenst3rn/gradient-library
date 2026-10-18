@@ -10,68 +10,59 @@
   <div class="top">
     <div class="header">
       <span class="brand"><span class="dot"></span><span class="brand-ms">MS</span><span class="brand-name">Gradients</span></span>
-      <span id="countInfo" class="target-name"></span>
+      <div class="ibtn more-btn" id="toolsBtn" title="Gradients panel, export, self-test"><span></span><span></span><span></span></div>
     </div>
 
-    <div id="current" class="current">
-      <div class="current-strip"><img id="currentImg" class="hidden"></div>
-      <div class="current-text"><span id="currentName" class="current-name">Click a gradient to apply it</span><span id="currentCat" class="current-cat"></span></div>
+    <div class="search-row">
+      <input type="text" id="search" class="grow" placeholder="Search 1444 gradients – gold, sunset, teal …">
+      <div id="clearSearch" class="ibtn hidden" title="Clear the search">×</div>
     </div>
 
-    <div class="seg target" id="asSeg">
+    <div class="nav-row">
+      <div class="menu-btn grow" id="catBtn"><span id="catName" class="menu-name">All gradients</span><span id="catCount" class="menu-n"></span><span class="caret"></span></div>
+      <div class="view-seg">
+        <div class="ibtn view-btn" data-v="grid" title="Swatches – the most gradients at a glance"><span class="ic-grid"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="ibtn view-btn" data-v="list" title="List – with names"><span class="ic-list"><i></i><i></i><i></i></span></div>
+      </div>
+    </div>
+
+    <div id="catMenu" class="menu hidden"></div>
+    <div id="toolsMenu" class="menu tools hidden">
+      <div class="menu-item" id="toPanelCat" title="Adds every gradient of the shown list as a group to Window › Gradients">Add this list to the Gradients panel</div>
+      <div class="menu-item" id="toPanelFav" title="Adds your favourites as a group to Window › Gradients">Add favourites to the Gradients panel</div>
+      <div class="menu-item" id="exportGrd" title="Saves the shown list as a .grd file (Gradients panel › menu › Import Gradients…)">Export this list as .grd…</div>
+      <div class="menu-sep"></div>
+      <div class="menu-item" id="selfTest" title="Creates a test document and checks every function">Self-test</div>
+      <div class="menu-note">Applied gradients are normal Photoshop layers: double-click the layer thumbnail to open Photoshop's gradient editor. Every gradient in this library is original and free to use in your work.</div>
+    </div>
+  </div>
+
+  <div class="scroller" id="scroller">
+    <div class="wrap">
+      <div id="grid" class="ggrid"></div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="info" id="info">
+      <div class="info-strip"><img id="infoImg" class="hidden"></div>
+      <div class="info-text"><span id="infoName" class="info-name">Click a gradient to apply it</span><span id="infoCat" class="info-cat">Point at one to see its name</span></div>
+      <div class="ibtn istar hidden" id="infoStar" title="Favourite">☆</div>
+    </div>
+    <div class="seg as-seg" id="asSeg">
       <div class="seg-btn" data-v="fill" title="A new gradient fill layer – double-click it to edit the gradient">Fill layer</div>
       <div class="seg-btn" data-v="map" title="A Gradient Map adjustment layer – colours your image with the gradient">Gradient Map</div>
     </div>
-
-    <div class="field" id="styleRow"><span class="field-label">Style</span><div class="seg grow" id="styleSeg"></div></div>
-    <div id="angleBox"></div>
-    <div class="row opts">
-      <div class="switch small" data-for="reverse" title="Run the gradient the other way"><span class="knob"></span><span class="sw-label">Reverse</span></div>
-      <input type="checkbox" id="reverse" class="hidden">
-      <div class="switch small" data-for="replace" title="With a gradient layer selected, a click swaps its gradient instead of adding a new layer"><span class="knob"></span><span class="sw-label">Swap selected</span></div>
-      <input type="checkbox" id="replace" class="hidden">
+    <div class="seg style-seg" id="styleSeg"></div>
+    <div class="opt-row">
+      <div class="angle" id="angleBox" title="Angle – drag the word left or right, or type a value">
+        <span class="angle-lbl" id="angleLbl">Angle</span><input type="text" id="angle" class="angle-num"><span class="angle-unit">°</span>
+      </div>
+      <div class="grow"></div>
+      <div class="tog" id="reverseTog" title="Run the gradient the other way">Reverse</div>
+      <div class="tog" id="replaceTog" title="With a gradient layer selected, a click swaps its gradient instead of adding a new layer">Swap selected</div>
     </div>
     <div id="status" class="status"></div>
-
-    <div class="search-row">
-      <input type="text" id="search" class="grow" placeholder="Search 1000+ gradients – e.g. gold, sunset, teal">
-      <div id="clearSearch" class="btn small ghost hidden">×</div>
-    </div>
-  </div>
-
-  <div class="scroller">
-  <div class="wrap">
-
-    <div class="sec open" data-sec="cats">
-      <div class="sec-head"><span class="sec-title">Browse</span><span id="catMeta" class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
-      <div class="sec-body"><div id="catList"></div></div>
-    </div>
-
-    <div class="sec open" data-sec="grid">
-      <div class="sec-head"><span id="gridTitle" class="sec-title">All</span><span id="gridMeta" class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
-      <div class="sec-body">
-        <div id="grid" class="ggrid"></div>
-        <div id="more" class="btn small ghost more hidden">Show more</div>
-      </div>
-    </div>
-
-    <div class="sec" data-sec="panel">
-      <div class="sec-head"><span class="sec-title">Gradients panel &amp; tools</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
-      <div class="sec-body">
-        <div class="hint first">Applied gradients are normal Photoshop layers: double-click the layer thumbnail to open Photoshop's gradient editor. There, "New" saves the gradient to the Gradients panel.</div>
-        <div class="row tools-row">
-          <div class="btn small" id="toPanelCat" title="Adds every gradient of the shown list as a group to Window › Gradients">Add list to Gradients panel</div>
-          <div class="btn small" id="toPanelFav" title="Adds your favourites as a group to Window › Gradients">Add favourites</div>
-        </div>
-        <div class="row tools-row">
-          <div class="btn small ghost" id="exportGrd" title="Saves the shown list as a .grd file (Gradients panel › menu › Import Gradients…)">Export .grd…</div>
-          <div class="btn small ghost" id="selfTest" title="Creates a test document and checks every function">Self-test</div>
-        </div>
-        <div class="hint">Star a gradient (☆) to keep it in Favourites. Every gradient in this library is original and free to use in your work.</div>
-      </div>
-    </div>
-
-  </div>
   </div>
   </div>
   <script src="main.js"></script>
