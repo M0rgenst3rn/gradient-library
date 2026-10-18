@@ -6,7 +6,7 @@
   <b>1,444 original gradients for Photoshop in 38 categories – one click puts them into your document as
   normal, fully editable gradient layers.</b><br>
   <sub>Photoshop 2023 (24.2) or newer · UXP panel</sub><br>
-  <sub>Free Photoshop tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <a href="https://github.com/M0rgenst3rn/ms-glow">Morgenstern Glow</a> · <b>Morgenstern Gradients</b> · <a href="https://github.com/M0rgenst3rn/ms-grids">Morgenstern Grids</a></sub>
+  <sub>Free tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <a href="https://github.com/M0rgenst3rn/ms-glow">Morgenstern Glow</a> · <b>Morgenstern Gradients</b> · <a href="https://github.com/M0rgenst3rn/ms-grids">Morgenstern Grids</a></sub>
 </p>
 
 ---
@@ -26,16 +26,18 @@ sets inside, so there is nothing to credit and nothing to worry about when you u
 ### Highlights
 
 - **1,444 gradients** in 6 groups and 38 categories
-- **Families at a glance**: every gradient sits in one tile with its variants (deeper, lighter, two-colour) as
-  slim swatches below – over 600 families in a dense swatch view, or a list with names
+- **Families at a glance**: every gradient sits in one tile with its variants (deeper, lighter, the middle,
+  two-colour) as slim swatches below – 618 families as **Swatches**, or as a **List** with names
 - **Fill layer or Gradient Map**: a gradient fill layer, or an adjustment layer that colours your photo
-- **Swap selected**: with a gradient layer selected, a click swaps its gradient. Angle, style, mask and position stay
-- **Style, angle and reverse** for new fill layers. Gradient Maps run dark → light automatically
+- **Swap selected** (on by default): with a gradient layer selected, a click swaps its gradient. Angle, style, mask
+  and position stay
+- **5 styles** (Linear, Radial, Angle, Reflected, Diamond) and the angle for fill layers, **Reverse** for both.
+  Gradient Maps run dark → light automatically
 - **Perceptual blending**: colours blend like the eye sees them, without muddy middles
-- **Search, favourites and recently used**. Point at a gradient to see its name
+- **Search, favourites and recently used** (the last 40). Point at a gradient to see its name
 - **Gradients panel**: add the shown list or your favourites to *Window › Gradients* as a group, or export a `.grd` file
 - **Transparent gradients**: fades, overlays and light leaks keep their transparency
-- **Self-test**: checks every function against the real Photoshop result
+- **Self-test**: 11 checks in a test document against the real Photoshop result
 
 ## The library
 
@@ -56,17 +58,25 @@ they run from shadows to highlights and give a photo a complete colour grade in 
 ## How to use it
 
 1. Open a document and the panel (**Plugins › MS Gradients**)
-2. Choose **Fill layer** or **Gradient Map**. For fill layers, also choose style and angle
-3. Pick a group or category from the menu above the swatches, or search (e.g. "gold", "teal film", "sunset")
+2. In the options bar at the bottom, choose **Fill layer** or **Gradient Map**. For fill layers also pick a style
+   and the **Angle** (type a value, or drag the word "Angle"; Shift for 15° steps)
+3. Pick a group or category from the menu button under the search field – it also has **★ Favourites** and
+   **Recently used** – or search (e.g. "gold", "teal film", "sunset"). **Swatches** and **List** switch the view
 4. **Click a gradient** – the large swatch, or one of its variants below it: it lands as a new layer above the selected one. With an active selection, the layer gets a matching mask
-5. Want a different one? Keep the layer selected and click another gradient: with **Swap selected** on, the layer just changes its gradient
+5. Want a different one? Keep the layer selected and click another gradient: with **Swap selected** on, the layer
+   just changes its gradient (a fill layer in Fill mode, a Gradient Map in Gradient Map mode)
 6. **Edit it in Photoshop**: double-click the layer thumbnail. For a fill layer, click the gradient in the dialog to open the gradient editor
+
+**Favourites:** point at a gradient and click ☆ – on the tile, or next to its name at the bottom.
 
 **Saving to the Gradients panel:**
 
 - **One gradient:** in Photoshop's gradient editor, type a name and click **New**
 - **A whole list:** open the **⋯** menu at the top of the panel and click **Add this list to the Gradients panel** (adds the list you see, e.g. a category or a search) or **Add favourites to the Gradients panel**. They appear in *Window › Gradients* as a group "MS Gradients · …"
 - **As a file:** **⋯ › Export this list as .grd…** saves the list. Import it later via *Window › Gradients › menu › Import Gradients…*
+
+**Self-test** (**⋯ › Self-test**) creates a test document and adds a small group "MS Gradients · Self-test" to
+*Window › Gradients*. Delete both afterwards.
 
 ## Installation
 
@@ -92,12 +102,15 @@ gradients/           The plugin (loaded into Photoshop as is)
   manifest.json      Plugin description
   index.html         Panel UI
   ms-ui.js/.css      Shared Morgenstern controls and design
-  main.js            Photoshop side (layers, Gradients panel, self-test)
+  styles.css         Panel layout and styles
+  main.js            Panel logic (browser, families, menus, favourites, options) and Photoshop side
+                     (layers, Gradients panel, self-test)
   core.js            Library, search and Photoshop commands, plain JavaScript
   color.js           Colour maths (OKLab)
   grd.js             Writes Photoshop gradient files (.grd)
   library.js         The gradients (generated)
   thumbs/            Previews, one image per category (generated)
+  icons/             Panel and plugin icons (generated)
 install-mac.sh       Packs the plugin (.ccx) and installs it
 tools/               Library builder, checks, README images, icons, browser preview of the panel
 docs/images/         Images of this README
@@ -107,7 +120,11 @@ docs/images/         Images of this README
 node tools/build-library.js   # tools/palettes.js -> gradients/library.js + previews
 node tools/check.js           # checks without Photoshop (library, commands, .grd)
 node tools/make-showcase.js   # rebuilds the image at the top of this README
+node tools/make-icons.js      # gradients/icons
 ```
+
+The panel in a browser, with Photoshop mocked: run `python3 -m http.server` in the repository and open
+`http://localhost:8000/tools/ui-preview.html`.
 
 **Adding gradients:** add a line `Name: #colour #colour …` to a category in `tools/palettes.js` (or a new
 category), then run `node tools/build-library.js`.
