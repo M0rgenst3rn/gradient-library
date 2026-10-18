@@ -170,7 +170,9 @@ async function gradientPresetCount() {
     return e && e.name ? e.name.length : -1;
   } catch (e) { return -1; }
 }
-// Writes the list as "MS Gradients · <title>.grd" and loads it into Window › Gradients (as a group of that name)
+// Writes the list as "MS Gradients · <title>.grd" and loads it into Window › Gradients (as a group of that
+// name). Two ways to load, the second only if the first added nothing; the status names what happened.
+let lastPanelNote = "";
 async function addToPanel(list, title) {
   if (!list.length) { setStatus("Nothing to add – the list is empty.", true); return false; }
   const folder = await lfs.getDataFolder();
@@ -178,13 +180,30 @@ async function addToPanel(list, title) {
   await file.write(grdOf(list).buffer, { format: require("uxp").storage.formats.binary });
   const token = lfs.createSessionToken(file);
   const before = await gradientPresetCount();
-  await core.executeAsModal(async () => {
-    await batchPlay([{ _obj: "set", _target: [{ _ref: "property", _property: "gradientClassEvent" }, { _ref: "application", _enum: "ordinal", _value: "targetEnum" }], to: { _path: token, _kind: "local" }, append: true }], {});
-  }, { commandName: HIST + " · Gradients panel" });
-  const after = await gradientPresetCount();
-  log("addToPanel", { title, n: list.length, before, after });
-  const ok = before < 0 || after < 0 || after - before === list.length;
-  setStatus(ok ? `Added ${list.length} gradients to Window › Gradients (group "MS Gradients · ${title}").` : `Photoshop added ${after - before} of ${list.length} gradients.`, !ok);
+  const tries = [
+    ["load", { _obj: "set", _target: [{ _ref: "property", _property: "gradientClassEvent" }, { _ref: "application", _enum: "ordinal", _value: "targetEnum" }], to: { _path: token, _kind: "local" }, append: true }],
+    ["open", { _obj: "open", null: { _path: token, _kind: "local" } }],
+  ];
+  const notes = [];
+  let after = before;
+  for (const [how, cmd] of tries) {
+    try {
+      await core.executeAsModal(async () => {
+        const r = await batchPlay([cmd], {});
+        if (r && r[0] && r[0]._obj === "error") throw new Error(r[0].message || "error " + r[0].result);
+      }, { commandName: HIST + " · Gradients panel" });
+      after = await gradientPresetCount();
+      notes.push(how + ": " + (after >= 0 && before >= 0 ? "+" + (after - before) : "done"));
+      if (before < 0 || after > before) break;
+    } catch (e) { notes.push(how + ": " + (e && e.message || e)); }
+  }
+  log("addToPanel", { title, n: list.length, before, after, notes });
+  lastPanelNote = `before ${before}, after ${after}; ${notes.join("; ")}`;
+  const added = before >= 0 && after >= 0 ? after - before : null;
+  const ok = added === list.length;
+  if (ok) setStatus(`Added ${list.length} gradients to Window › Gradients (group "MS Gradients · ${title}").`);
+  else if (added === null) setStatus(`Sent ${list.length} gradients to Window › Gradients – please check the group "MS Gradients · ${title}" there. (${notes.join("; ")})`);
+  else setStatus(`Photoshop added ${added} of ${list.length} gradients. (${notes.join("; ")}) – Export .grd… and Window › Gradients › Import still works.`, true);
   return ok;
 }
 async function exportGrd() {
@@ -278,7 +297,7 @@ async function selfTest() {
   Object.assign(S, saved); save(); renderOptions(); renderCats(); renderGrid();
   const bad = results.filter((r) => !r.ok);
   log("SELFTEST", { secs: Math.round((Date.now() - t0) / 1000), results });
-  setStatus(`Self-test: ${results.length - bad.length} / ${results.length} ok` + (bad.length ? " – failed: " + bad.map((b) => b.name).join("; ") : ". The test document stays open, close it without saving."), bad.length > 0);
+  setStatus(`Self-test: ${results.length - bad.length} / ${results.length} ok` + (bad.length ? " – failed: " + bad.map((b) => b.name).join("; ") + (bad.some((b) => /Gradients panel/.test(b.name)) ? " [" + lastPanelNote + "]" : "") : ". The test document stays open, close it without saving."), bad.length > 0);
 }
 
 // ---------------------------------------------------------------- wiring

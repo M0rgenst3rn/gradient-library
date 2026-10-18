@@ -1,6 +1,8 @@
 "use strict";
 // Writes Photoshop gradient files (.grd, version 5): the format Photoshop's Gradients panel imports.
-// A version 5 file is "8BGR", version 5, then one Photoshop descriptor with a list of gradients.
+// A version 5 file is "8BGR", version 5, the number 16, then one Photoshop descriptor: a list "GrdL" whose
+// entries are objects of class "Grdn" (named "Gradient") that hold the gradient under the key "Grad".
+// Names inside the file end with a 0 character, like Photoshop writes them.
 // gradients: [{ name, stops: [{ hex, a, pos }] }]  ->  Uint8Array
 
 function writer() {
@@ -10,8 +12,8 @@ function writer() {
   const u32 = (v) => { u8(v >>> 24); u8(v >>> 16); u8(v >>> 8); u8(v); };
   const ascii = (s) => { for (let i = 0; i < s.length; i++) u8(s.charCodeAt(i)); };
   const f64 = (v) => { const b = new DataView(new ArrayBuffer(8)); b.setFloat64(0, v); for (let i = 0; i < 8; i++) u8(b.getUint8(i)); };
-  // Unicode string: length in UTF-16 units including the closing 0, then UTF-16BE
-  const ustr = (s) => { u32(s.length + 1); for (let i = 0; i < s.length; i++) u16(s.charCodeAt(i)); u16(0); };
+  // Unicode string: length in UTF-16 units, then UTF-16BE (callers add the closing 0 where Photoshop has one)
+  const ustr = (s) => { u32(s.length); for (let i = 0; i < s.length; i++) u16(s.charCodeAt(i)); };
   // key / class ID: 4-letter code (length 0) or a longer string id
   const id = (s) => { if (s.length === 4) { u32(0); ascii(s); } else { u32(s.length); ascii(s); } };
   return { bytes, u8, u16, u32, ascii, f64, ustr, id };
@@ -26,7 +28,7 @@ function value(w, type, v) {
   switch (type) {
     case "Objc": descriptor(w, v.className || "", v.classId, v.items); break;
     case "VlLs": w.u32(v.length); for (const [t, x] of v) { w.ascii(t); value(w, t, x); } break;
-    case "TEXT": w.ustr(v); break;
+    case "TEXT": w.ustr(v + "\u0000"); break;
     case "doub": w.f64(v); break;
     case "long": w.u32(v | 0); break;
     case "enum": w.id(v[0]); w.id(v[1]); break;
@@ -40,14 +42,14 @@ const loc = (pos) => Math.round(Math.max(0, Math.min(100, pos)) / 100 * 4096);
 function gradientItems(g, hexRgb) {
   const colors = g.stops.map((s) => {
     const c = hexRgb(s.hex);
-    return ["Objc", { className: "", classId: "Clrt", items: [
-      ["Clr ", "Objc", { className: "", classId: "RGBC", items: [["Rd  ", "doub", c[0]], ["Grn ", "doub", c[1]], ["Bl  ", "doub", c[2]]] }],
+    return ["Objc", { className: "\u0000", classId: "Clrt", items: [
+      ["Clr ", "Objc", { className: "\u0000", classId: "RGBC", items: [["Rd  ", "doub", c[0]], ["Grn ", "doub", c[1]], ["Bl  ", "doub", c[2]]] }],
       ["Type", "enum", ["Clry", "UsrS"]],
       ["Lctn", "long", loc(s.pos)],
       ["Mdpn", "long", 50],
     ] }];
   });
-  const trans = g.stops.map((s) => ["Objc", { className: "", classId: "TrnS", items: [
+  const trans = g.stops.map((s) => ["Objc", { className: "\u0000", classId: "TrnS", items: [
     ["Opct", "UntF", ["#Prc", s.a]],
     ["Lctn", "long", loc(s.pos)],
     ["Mdpn", "long", 50],
@@ -64,8 +66,8 @@ function gradientItems(g, hexRgb) {
 function encodeGrd(gradients, hexRgb) {
   const w = writer();
   w.ascii("8BGR"); w.u16(5); w.u32(16);
-  const list = gradients.map((g) => ["Objc", { className: "", classId: "Grdn", items: [
-    ["Grdn", "Objc", { className: "Gradient", classId: "Grdn", items: gradientItems(g, hexRgb) }],
+  const list = gradients.map((g) => ["Objc", { className: "Gradient\u0000", classId: "Grdn", items: [
+    ["Grad", "Objc", { className: g.name + "\u0000", classId: "Grdn", items: gradientItems(g, hexRgb) }],
   ] }]);
   descriptor(w, "", "null", [["GrdL", "VlLs", list]]);
   return Uint8Array.from(w.bytes);
@@ -96,7 +98,7 @@ function decodeGrd(buf) {
   const version = u16(); u32();
   const root = desc();
   if (o !== buf.length) throw new Error("grd: " + (buf.length - o) + " bytes left over");
-  return { version, gradients: root.items.GrdL.map((e) => e.items.Grdn.items) };
+  return { version, gradients: root.items.GrdL.map((e) => e.items.Grad.items) };
 }
 
 module.exports = { encodeGrd, decodeGrd };
