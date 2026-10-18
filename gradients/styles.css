@@ -1,0 +1,43 @@
+/* Morgenstern Gradients – additions to the shared Morgenstern design (ms-ui.css) */
+.field-label { width: 44px; }
+
+/* last applied gradient */
+.current { display: flex; flex-direction: row; align-items: center; padding: 8px; border: 1px solid #1a2236; border-radius: 10px; background-color: #03050a; }
+.current-strip { position: relative; width: 112px; height: 30px; border-radius: 6px; overflow: hidden; flex-shrink: 0; background-color: #0d1220; }
+.current-strip img { position: absolute; left: 0; }
+.current-text { display: flex; flex-direction: column; margin-left: 10px; overflow: hidden; }
+.current-name { font-size: 11px; font-weight: 600; color: #e6ebf7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.current-cat { font-size: 10px; color: #7e89a6; padding-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.opts { margin-top: 6px; }
+.search-row { display: flex; flex-direction: row; align-items: center; margin-top: 10px; }
+.search-row > * { margin-right: 6px; }
+.search-row > *:last-child { margin-right: 0; }
+#search { padding: 6px 8px; }
+
+/* categories: groups on top, the chosen group's categories on a tinted surface below */
+.sub-chips { display: flex; flex-direction: row; flex-wrap: wrap; margin: 6px 0 0; padding: 4px; border-radius: 8px; background-color: #0b1020; }
+.sub-chips .chip { background-color: #0d1220; }
+.sub-chips .chip.active { background-color: #2f5bff; }
+.chips { display: flex; flex-direction: row; flex-wrap: wrap; margin: 0 -2px; }
+.chip { font-size: 10px; padding: 4px 8px; margin: 2px; border-radius: 11px; border: 1px solid #1a2236; background-color: #0d1220; color: #a7b1ca; cursor: pointer; white-space: nowrap; }
+.chip:hover { color: #e6ebf7; border-color: #2a3a66; }
+.chip.active { background-color: #2f5bff; border-color: #7b9cff; color: #ffffff; }
+.chip .n { color: #7e89a6; margin-left: 4px; }
+.chip.active .n { color: #c9d6ff; }
+
+/* gradient grid */
+.ggrid { display: flex; flex-direction: row; flex-wrap: wrap; margin: 0 -3px; }
+.gtile { box-sizing: border-box; width: 48%; margin: 1%; padding: 3px; border: 1px solid #141b2c; border-radius: 8px; cursor: pointer; background-color: #0b0f1a; position: relative; }
+.gtile:hover { border-color: #2a3a66; }
+.gtile.active { border-color: #2f5bff; background-color: #101a3a; }
+.gthumb { position: relative; height: 30px; border-radius: 5px; overflow: hidden; background-color: #03050a; }
+.gthumb img { position: absolute; left: 0; width: 100%; }
+.gname { display: flex; flex-direction: row; align-items: center; padding: 4px 1px 1px; }
+.gname .lbl { flex: 1; font-size: 10px; color: #a7b1ca; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gtile.active .lbl { color: #ffffff; }
+.star { width: 14px; text-align: center; font-size: 11px; color: #4a5678; cursor: pointer; flex-shrink: 0; }
+.star:hover { color: #7b9cff; }
+.star.on { color: #ffd166; }
+.more { margin-top: 8px; }
+.hint.first { margin-top: 0; }

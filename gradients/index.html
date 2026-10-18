@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="ms-ui.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout">
+  <div class="top">
+    <div class="header">
+      <span class="brand"><span class="dot"></span><span class="brand-ms">MS</span><span class="brand-name">Gradients</span></span>
+      <span id="countInfo" class="target-name"></span>
+    </div>
+
+    <div id="current" class="current">
+      <div class="current-strip"><img id="currentImg" class="hidden"></div>
+      <div class="current-text"><span id="currentName" class="current-name">Click a gradient to apply it</span><span id="currentCat" class="current-cat"></span></div>
+    </div>
+
+    <div class="seg target" id="asSeg">
+      <div class="seg-btn" data-v="fill" title="A new gradient fill layer – double-click it to edit the gradient">Fill layer</div>
+      <div class="seg-btn" data-v="map" title="A Gradient Map adjustment layer – colours your image with the gradient">Gradient Map</div>
+    </div>
+
+    <div class="field" id="styleRow"><span class="field-label">Style</span><div class="seg grow" id="styleSeg"></div></div>
+    <div id="angleBox"></div>
+    <div class="row opts">
+      <div class="switch small" data-for="reverse" title="Run the gradient the other way"><span class="knob"></span><span class="sw-label">Reverse</span></div>
+      <input type="checkbox" id="reverse" class="hidden">
+      <div class="switch small" data-for="replace" title="With a gradient layer selected, a click swaps its gradient instead of adding a new layer"><span class="knob"></span><span class="sw-label">Swap selected</span></div>
+      <input type="checkbox" id="replace" class="hidden">
+    </div>
+    <div id="status" class="status"></div>
+
+    <div class="search-row">
+      <input type="text" id="search" class="grow" placeholder="Search 1000+ gradients – e.g. gold, sunset, teal">
+      <div id="clearSearch" class="btn small ghost hidden">×</div>
+    </div>
+  </div>
+
+  <div class="scroller">
+  <div class="wrap">
+
+    <div class="sec open" data-sec="cats">
+      <div class="sec-head"><span class="sec-title">Browse</span><span id="catMeta" class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
+      <div class="sec-body"><div id="catList"></div></div>
+    </div>
+
+    <div class="sec open" data-sec="grid">
+      <div class="sec-head"><span id="gridTitle" class="sec-title">All</span><span id="gridMeta" class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
+      <div class="sec-body">
+        <div id="grid" class="ggrid"></div>
+        <div id="more" class="btn small ghost more hidden">Show more</div>
+      </div>
+    </div>
+
+    <div class="sec" data-sec="panel">
+      <div class="sec-head"><span class="sec-title">Gradients panel &amp; tools</span><span class="sec-meta"></span><span class="chev c-open">–</span><span class="chev c-closed">+</span></div>
+      <div class="sec-body">
+        <div class="hint first">Applied gradients are normal Photoshop layers: double-click the layer thumbnail to open Photoshop's gradient editor. There, "New" saves the gradient to the Gradients panel.</div>
+        <div class="row tools-row">
+          <div class="btn small" id="toPanelCat" title="Adds every gradient of the shown list as a group to Window › Gradients">Add list to Gradients panel</div>
+          <div class="btn small" id="toPanelFav" title="Adds your favourites as a group to Window › Gradients">Add favourites</div>
+        </div>
+        <div class="row tools-row">
+          <div class="btn small ghost" id="exportGrd" title="Saves the shown list as a .grd file (Gradients panel › menu › Import Gradients…)">Export .grd…</div>
+          <div class="btn small ghost" id="selfTest" title="Creates a test document and checks every function">Self-test</div>
+        </div>
+        <div class="hint">Star a gradient (☆) to keep it in Favourites. Every gradient in this library is original and free to use in your work.</div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
