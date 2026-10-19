@@ -1,5 +1,5 @@
 "use strict";
-// Morgenstern Gradients – logic without Photoshop: the library, search, and the Photoshop commands
+// Gradient Library – logic without Photoshop: the library, search, and the Photoshop commands
 // (batchPlay descriptors) that create or change gradient layers. Runs in the panel and in Node (checks).
 
 const LIB = require("./library.js");

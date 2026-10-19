@@ -1,6 +1,6 @@
 {
-  "id": "com.linus.msgradients",
-  "name": "MS Gradients",
+  "id": "com.linus.gradientlibrary",
+  "name": "Gradient Library",
   "version": "0.1.0",
   "main": "index.html",
   "manifestVersion": 5,
@@ -16,7 +16,7 @@
       "type": "panel",
       "id": "gradientsPanel",
       "label": {
-        "default": "MS Gradients"
+        "default": "Gradient Library"
       },
       "minimumSize": {
         "width": 280,

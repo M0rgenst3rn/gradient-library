@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="docs/images/library.png" alt="Morgenstern Gradients – the library" width="100%">
+  <img src="docs/images/library.png" alt="Gradient Library – the library" width="100%">
 </p>
 
 <p align="center">
   <b>1,444 original gradients for Photoshop in 38 categories – one click puts them into your document as
   normal, fully editable gradient layers.</b><br>
   <sub>Photoshop 2023 (24.2) or newer · UXP panel</sub><br>
-  <sub>Free tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <a href="https://github.com/M0rgenst3rn/ms-glow">Morgenstern Glow</a> · <b>Morgenstern Gradients</b> · <a href="https://github.com/M0rgenst3rn/ms-grids">Morgenstern Grids</a></sub>
+  <sub>More tools by <b>Linus Leinberger</b> · <a href="https://github.com/M0rgenst3rn/afterglow">Afterglow</a> · <a href="https://github.com/M0rgenst3rn/asciiwave">Asciiwave</a> · <b>Gradient Library</b> · <a href="https://github.com/M0rgenst3rn/gridwork">Gridwork</a> · <a href="https://github.com/M0rgenst3rn/grime">Grime</a> · <a href="https://github.com/M0rgenst3rn/headliner">Headliner</a> · <a href="https://github.com/M0rgenst3rn/misprint">Misprint</a> · <a href="https://github.com/M0rgenst3rn/seamline">Seamline</a> · <a href="https://github.com/M0rgenst3rn/vhold">Vhold</a></sub>
 </p>
 
 ---
 
-## What is Morgenstern Gradients?
+## What is Gradient Library?
 
 A large gradient library inside Photoshop. Browse by group and category, search by name, mark favourites,
 and click a gradient to apply it. The result is a normal Photoshop layer, nothing special: double-click it
@@ -57,7 +57,7 @@ they run from shadows to highlights and give a photo a complete colour grade in 
 
 ## How to use it
 
-1. Open a document and the panel (**Plugins › MS Gradients**)
+1. Open a document and the panel (**Plugins › Gradient Library**)
 2. In the options bar at the bottom, choose **Fill layer** or **Gradient Map**. For fill layers also pick a style
    and the **Angle** (type a value, or drag the word "Angle"; Shift for 15° steps)
 3. Pick a group or category from the menu button under the search field – it also has **★ Favourites** and
@@ -72,10 +72,10 @@ they run from shadows to highlights and give a photo a complete colour grade in 
 **Saving to the Gradients panel:**
 
 - **One gradient:** in Photoshop's gradient editor, type a name and click **New**
-- **A whole list:** open the **⋯** menu at the top of the panel and click **Add this list to the Gradients panel** (adds the list you see, e.g. a category or a search) or **Add favourites to the Gradients panel**. They appear in *Window › Gradients* as a group "MS Gradients · …"
+- **A whole list:** open the **⋯** menu at the top of the panel and click **Add this list to the Gradients panel** (adds the list you see, e.g. a category or a search) or **Add favourites to the Gradients panel**. They appear in *Window › Gradients* as a group "Gradient Library · …"
 - **As a file:** **⋯ › Export this list as .grd…** saves the list. Import it later via *Window › Gradients › menu › Import Gradients…*
 
-**Self-test** (**⋯ › Self-test**) creates a test document and adds a small group "MS Gradients · Self-test" to
+**Self-test** (**⋯ › Self-test**) creates a test document and adds a small group "Gradient Library · Self-test" to
 *Window › Gradients*. Delete both afterwards.
 
 ## Installation
@@ -87,7 +87,7 @@ they run from shadows to highlights and give a photo a complete colour grade in 
    ```bash
    bash install-mac.sh
    ```
-3. (Re)start Photoshop → **Plugins › MS Gradients**
+3. (Re)start Photoshop → **Plugins › Gradient Library**
 
 ### Alternative: UXP Developer Tool (macOS & Windows)
 
@@ -101,7 +101,7 @@ they run from shadows to highlights and give a photo a complete colour grade in 
 gradients/           The plugin (loaded into Photoshop as is)
   manifest.json      Plugin description
   index.html         Panel UI
-  ms-ui.js/.css      Shared Morgenstern controls and design
+  ui.js/.css      Shared controls and design
   styles.css         Panel layout and styles
   main.js            Panel logic (browser, families, menus, favourites, options) and Photoshop side
                      (layers, Gradients panel, self-test)
@@ -131,7 +131,7 @@ category), then run `node tools/build-library.js`.
 
 ## Found a bug? Got an idea?
 
-Get in touch! The easiest way is **[Issues](https://github.com/M0rgenst3rn/ms-gradients/issues)** here on GitHub:
+Get in touch! The easiest way is **[Issues](https://github.com/M0rgenst3rn/gradient-library/issues)** here on GitHub:
 click **New issue** and briefly describe what happened. Your Photoshop version, operating system and a
 screenshot help a lot. All you need is a free GitHub account. Suggestions and feature requests are just as
 welcome.
@@ -149,5 +149,5 @@ Adobe and Photoshop are trademarks of Adobe Inc. This project is independent and
 
 ---
 
-<p align="center"><sub>Morgenstern Gradients<br>
-Made by Linus Leinberger</sub></p>
+<p align="center"><sub>Gradient Library<br>
+Made by Linus Leinberger · <a href="https://www.instagram.com/linusleinberger">Instagram @linusleinberger</a></sub></p>

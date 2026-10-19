@@ -1,5 +1,5 @@
 "use strict";
-// MS Gradients – Photoshop UXP panel.
+// Gradient Library – Photoshop UXP panel.
 // A library of 1000+ original gradients in categories. A click puts the gradient into the document as a
 // normal Photoshop layer: a gradient fill layer or a Gradient Map adjustment layer. Both stay fully editable
 // with Photoshop's own tools (double-click the layer → gradient editor → "New" saves it to the Gradients
@@ -8,14 +8,14 @@
 const { app, core, action } = require("photoshop");
 const { batchPlay } = action;
 const lfs = require("uxp").storage.localFileSystem;
-const UI = require("./ms-ui.js");
+const UI = require("./ui.js");
 const Core = require("./core.js");
 const C = require("./color.js");
 const { encodeGrd } = require("./grd.js");
 
 const $ = (id) => document.getElementById(id);
-const HIST = "MS Gradients";
-const STORE = "msgradients.v1";
+const HIST = "Gradient Library";
+const STORE = "gradientlibrary.v1";
 const TARGET = [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }];
 const CHUNK = 60;   // tiles per render step while scrolling
 
@@ -247,13 +247,13 @@ async function gradientPresetCount() {
     return e && e.name ? e.name.length : -1;
   } catch (e) { return -1; }
 }
-// Writes the list as "MS Gradients · <title>.grd" and loads it into Window › Gradients (as a group of that
+// Writes the list as "Gradient Library · <title>.grd" and loads it into Window › Gradients (as a group of that
 // name). Two ways to load, the second only if the first added nothing; the status names what happened.
 let lastPanelNote = "";
 async function addToPanel(list, title) {
   if (!list.length) { setStatus("Nothing to add – the list is empty.", true); return false; }
   const folder = await lfs.getDataFolder();
-  const file = await folder.createFile(safeName("MS Gradients · " + title) + ".grd", { overwrite: true });
+  const file = await folder.createFile(safeName("Gradient Library · " + title) + ".grd", { overwrite: true });
   await file.write(grdOf(list).buffer, { format: require("uxp").storage.formats.binary });
   const token = lfs.createSessionToken(file);
   const before = await gradientPresetCount();
@@ -278,15 +278,15 @@ async function addToPanel(list, title) {
   lastPanelNote = `before ${before}, after ${after}; ${notes.join("; ")}`;
   const added = before >= 0 && after >= 0 ? after - before : null;
   const ok = added === list.length;
-  if (ok) setStatus(`Added ${list.length} gradients to Window › Gradients (group "MS Gradients · ${title}").`);
-  else if (added === null) setStatus(`Sent ${list.length} gradients to Window › Gradients – please check the group "MS Gradients · ${title}" there. (${notes.join("; ")})`);
+  if (ok) setStatus(`Added ${list.length} gradients to Window › Gradients (group "Gradient Library · ${title}").`);
+  else if (added === null) setStatus(`Sent ${list.length} gradients to Window › Gradients – please check the group "Gradient Library · ${title}" there. (${notes.join("; ")})`);
   else setStatus(`Photoshop added ${added} of ${list.length} gradients. (${notes.join("; ")}) – Export .grd… and Window › Gradients › Import still works.`, true);
   return ok;
 }
 async function exportGrd() {
   const list = currentList();
   if (!list.length) { setStatus("Nothing to export – the list is empty.", true); return; }
-  const file = await lfs.getFileForSaving(safeName("MS Gradients · " + catTitle(S.cat)) + ".grd", { types: ["grd"] });
+  const file = await lfs.getFileForSaving(safeName("Gradient Library · " + catTitle(S.cat)) + ".grd", { types: ["grd"] });
   if (!file) return;
   await file.write(grdOf(list).buffer, { format: require("uxp").storage.formats.binary });
   setStatus(`Saved ${list.length} gradients. Import them via Window › Gradients › menu › Import Gradients…`);
@@ -314,7 +314,7 @@ async function selfTest() {
   });
   try {
     await core.executeAsModal(async () => {
-      doc = await app.documents.add({ width: 800, height: 400, resolution: 72, mode: "RGBColorMode", fill: "white", name: "MS Gradients Self-test" });
+      doc = await app.documents.add({ width: 800, height: 400, resolution: 72, mode: "RGBColorMode", fill: "white", name: "Gradient Library Self-test" });
     }, { commandName: HIST + " self-test" });
     const g1 = Core.BY_KEY["sunset/Coral Dusk"] || Core.ALL[0], g2 = Core.BY_KEY["metals/Gold Bar"] || Core.ALL[1], g3 = Core.BY_KEY["fades/Black Fade"] || Core.ALL[2];
     Object.assign(S, { as: "fill", style: "linear", angle: 90, reverse: false, replace: true });
