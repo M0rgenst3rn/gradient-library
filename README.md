@@ -6,7 +6,7 @@
   <b>1,444 original gradients for Photoshop in 38 categories – one click puts them into your document as
   normal, fully editable gradient layers.</b><br>
   <sub>Photoshop 2023 (24.2) or newer · UXP panel</sub><br>
-  <sub>Free tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <a href="https://github.com/M0rgenst3rn/ms-glow">Morgenstern Glow</a> · <b>Morgenstern Gradients</b> · <a href="https://github.com/M0rgenst3rn/ms-grids">Morgenstern Grids</a></sub>
+  <sub>Free tools by <b>Morgenstern</b> · <a href="https://github.com/M0rgenst3rn/ms-distress">Morgenstern Distress</a> · <a href="https://github.com/M0rgenst3rn/ms-printer">Morgenstern Printer</a> · <a href="https://github.com/M0rgenst3rn/ms-render">Morgenstern Render</a> · <a href="https://github.com/M0rgenst3rn/ms-phase">Morgenstern Phase</a> · <a href="https://github.com/M0rgenst3rn/ms-glow">Morgenstern Glow</a> · <b>Morgenstern Gradients</b> · <a href="https://github.com/M0rgenst3rn/ms-grids">Morgenstern Grids</a> · <a href="https://github.com/M0rgenst3rn/ms-ascii">Morgenstern ASCII</a></sub>
 </p>
 
 ---
